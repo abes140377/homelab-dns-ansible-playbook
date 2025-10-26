@@ -1,0 +1,15 @@
+---
+# Minimal galaxy.yml for a playbook project for tools to recognize this as a collection
+
+namespace: "homelab"
+name: "dns"
+readme: README.md
+version: 0.0.1
+authors:
+  - your name <example@domain.com>
+
+description: Collection for homelab.dns playbook project
+
+# TO-DO: update the tags based on your content type
+tags: ["tools"]
+repository: NA

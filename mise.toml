@@ -1,0 +1,31 @@
+[tools]
+uv = "latest"
+
+[settings]
+python.uv_venv_auto = true
+
+[env]
+PROJECT_NAME = "{{ config_root | basename }}"
+
+_.file = [
+  { path = "{{env.HOME}}/.env", optional = true },
+  { path = ".env", optional = true },
+  { path = ".creds.env.yaml", redact = true }
+]
+_.python.venv = { path = ".venv", create = true }
+
+[hooks]
+enter = [
+  'echo ""',
+  'echo "[MISE] Setup $PROJECT_NAME project..."',
+  #
+  'mise i -q',
+  #
+  'pre-commit install',
+  #
+  'uv pip install -q -r requirements.txt'
+]
+
+[tasks.install-deps]
+description = "Install Python dependencies"
+run = "uv pip install -r requirements.txt"
