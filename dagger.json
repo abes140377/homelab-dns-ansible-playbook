@@ -1,0 +1,8 @@
+{
+  "name": "homelab-dns-ansible-playbook",
+  "engineVersion": "v0.19.3",
+  "sdk": {
+    "source": "python"
+  },
+  "source": ".dagger"
+}

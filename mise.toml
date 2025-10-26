@@ -1,4 +1,5 @@
 [tools]
+dagger = "0.19.3"
 uv = "latest"
 
 [settings]
