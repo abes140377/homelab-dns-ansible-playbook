@@ -9,6 +9,7 @@ class HomelabDnsAnsiblePlaybook:
         self,
         directory: dagger.Directory,
         playbook: str = "site.yml",
+        requirements_file: str = "requirements.yml",
         ssh_private_key: dagger.Secret | None = None,
     ) -> str:
         """
@@ -26,6 +27,7 @@ class HomelabDnsAnsiblePlaybook:
         result = await dag.ansible().run_playbook(
             directory=directory,
             playbook=playbook,
+            requirements_file=requirements_file,
             ssh_private_key=ssh_private_key,
         )
 
