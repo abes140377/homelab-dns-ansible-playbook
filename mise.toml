@@ -24,9 +24,22 @@ enter = [
   #
   'pre-commit install',
   #
-  'uv pip install -q -r requirements.txt'
+  'uv pip install -q -r requirements.txt',
+  #
+  'echo "$ANSIBLE_SSH_PRIVATE_KEY" > keys/ansible_id_ecdsa',
+  'chmod 600 keys/ansible_id_ecdsa'
 ]
 
 [tasks.install-deps]
 description = "Install Python dependencies"
 run = "uv pip install -r requirements.txt"
+
+[tasks."dagger:run-playbook"]
+description = "Run Ansible playbook using Dagger"
+run = '''
+dagger -m github.com/abes140377/homelab-daggerverse/ansible \
+  call run-playbook \
+  --directory . \
+  --playbook site.yml \
+  --ssh-private-key=file:./keys/ansible_id_ecdsa
+'''

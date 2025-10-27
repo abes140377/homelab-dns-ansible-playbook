@@ -23,8 +23,10 @@ This is an Ansible playbook project for managing homelab DNS infrastructure. The
 - `ansible.cfg`: Configures inventory path, verbosity=2, remote_user, timeout settings
 - `ansible-navigator.yml`: Debug logging to `.logs/` directory, enables playbook artifacts
 - `.pre-commit-config.yaml`: Runs gitleaks and basic file checks
-- `mise.toml`: Project automation using mise, manages Python virtual environment with uv
+- `mise.toml`: Project automation using mise, manages Python virtual environment with uv, includes Dagger integration
+- `devfile.yaml`: OpenShift Dev Spaces configuration for containerized development
 - `AGENTS.md`: References official Ansible agent guidelines (must follow practices from ansible-creator docs)
+- `docs/dagger.md`: Documentation for Dagger-based playbook execution
 
 ## Development Commands
 
@@ -34,13 +36,25 @@ This is an Ansible playbook project for managing homelab DNS infrastructure. The
 # Manually trigger if needed:
 mise install
 mise run install-deps
+
+# List all available mise tasks
+mise tasks
 ```
 
 This installs:
+- Tools: dagger (0.19.3), uv (latest)
 - Python dependencies via uv (ansible-dev-tools~=25.9)
 - Pre-commit hooks (gitleaks, end-of-file-fixer, trailing-whitespace)
+- SSH keys: Creates `keys/ansible_id_ecdsa` from `$ANSIBLE_SSH_PRIVATE_KEY` env variable
+
+**Environment Files**:
+- `.creds.env.yaml`: Credentials file (git-ignored, redacted in mise output)
+- `.env`: Optional environment variables
+- `~/.env`: Optional global environment variables
 
 ### Running Playbooks
+
+**Standard Execution**:
 ```bash
 # Run main playbook against all hosts
 ansible-playbook site.yml
@@ -58,6 +72,21 @@ ansible-playbook site.yml --check
 # With ansible-navigator (generates artifacts in .logs/)
 ansible-navigator run site.yml
 ```
+
+**Dagger Execution** (Containerized):
+```bash
+# Run playbook using Dagger (requires keys/ansible_id_ecdsa)
+mise run dagger:run-playbook
+
+# Equivalent direct dagger command
+dagger -m github.com/abes140377/homelab-daggerverse/ansible \
+  call run-playbook \
+  --directory . \
+  --playbook site.yml \
+  --ssh-private-key=file:./keys/ansible_id_ecdsa
+```
+
+Note: Dagger execution requires `$ANSIBLE_SSH_PRIVATE_KEY` env variable to be set. The mise hook automatically creates `keys/ansible_id_ecdsa` from this variable. See `docs/dagger.md` for details.
 
 ### Argument Specification Validation
 ```bash
@@ -128,8 +157,13 @@ ansible-playbook -i localhost, -c local tests/test.yml
 ## Project-Specific Notes
 
 - **Default remote user**: `myuser` (set in ansible.cfg)
-- **SSH keys**: Configured per-host in inventory
-- **Logging**: ansible-navigator logs to `.logs/ansible-navigator.log`
+- **SSH keys**:
+  - Managed SSH key: `keys/ansible_id_ecdsa` (auto-created from env var)
+  - Public key: `keys/ansible_id_ecdsa.pub`
+  - Per-host keys can be configured in inventory
+- **Logging**: ansible-navigator logs to `.logs/ansible-navigator.log`, artifacts to `.logs/{playbook_name}-artifact-{timestamp}.json`
 - **Credentials**: `.creds.env.yaml` is git-ignored, loaded by mise (redacted in output)
-- **Python**: Project uses uv for fast dependency management, auto-creates venv
+- **Python**: Project uses uv for fast dependency management, auto-creates venv in `.venv`
 - **Collection version**: Currently 0.0.1, update in `collections/ansible_collections/homelab/dns/galaxy.yml`
+- **Dagger**: Version 0.19.3 managed by mise, used for containerized playbook execution
+- **Dev Spaces**: devfile.yaml enables OpenShift Dev Spaces with ghcr.io/ansible/ansible-devspaces:latest
