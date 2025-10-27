@@ -43,3 +43,13 @@ dagger -w call ansible-build \
   --requirements-file collections/requirements.yml \
   --ssh-private-key file:./keys/ansible_id_ecdsa
 '''
+
+[tasks.test]
+description = "Run testinfra tests against Ansible hosts"
+run = '''
+# Temporarily uninstall pytest-ansible to avoid plugin conflicts
+uv pip uninstall -q pytest-ansible
+pytest tests/ -v
+# Reinstall pytest-ansible (part of ansible-dev-tools)
+uv pip install -q -r requirements.txt
+'''

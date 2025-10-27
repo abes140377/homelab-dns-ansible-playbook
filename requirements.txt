@@ -1,1 +1,3 @@
 ansible-dev-tools~=25.9
+pytest
+pytest-testinfra
