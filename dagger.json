@@ -4,5 +4,12 @@
   "sdk": {
     "source": "python"
   },
+  "dependencies": [
+    {
+      "name": "ansible",
+      "source": "github.com/abes140377/homelab-daggerverse/ansible@main",
+      "pin": "d2cb0075788e43e4106a2d5f6e04f89fa44818d3"
+    }
+  ],
   "source": ".dagger"
 }

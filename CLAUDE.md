@@ -154,6 +154,81 @@ ansible-playbook -i localhost, -c local tests/test.yml
 - Write integration tests for complete workflows
 - Check mode must be supported and tested
 
+## Dagger Integration
+
+The project includes Dagger for containerized workflow execution. The Dagger module is located in `.dagger/` and uses the Python SDK.
+
+### Dagger Setup
+```bash
+# Dagger is installed via mise (see mise.toml)
+# Dependencies are automatically managed in dagger.json
+
+# List available Dagger functions
+dagger functions
+
+# Install additional Dagger dependencies
+dagger install <module-source>
+```
+
+### Available Dagger Functions
+
+#### ansible-build
+Runs the Ansible playbook using the remote ansible module from homelab-daggerverse.
+
+```bash
+# Run with local function
+dagger call ansible-build \
+  --playbook site.yml \
+  --ssh-private-key=file:./keys/ansible_id_ecdsa
+
+# Or use the mise task
+mise run dagger:ansible-build
+```
+
+**Parameters:**
+- `--playbook`: Playbook file to run (default: `site.yml`)
+- `--ssh-private-key`: SSH private key for Ansible connections (use `file:./path/to/key` syntax)
+
+#### galaxy-install
+Install Ansible Galaxy collections from a requirements file.
+
+```bash
+# Install collections
+dagger call galaxy-install \
+  --directory . \
+  --requirements-file collections/requirements.yml
+
+# Or use the mise task
+mise run dagger:galaxy-install
+```
+
+**Parameters:**
+- `--directory`: Directory containing the requirements file
+- `--requirements-file`: Path to the requirements file (default: `requirements.yml`)
+
+**Returns:**
+A container with the collections installed (can be chained with other Dagger operations)
+
+**Dependencies:**
+Both functions use the `ansible` module from `github.com/abes140377/homelab-daggerverse/ansible`, which is declared in `dagger.json`.
+
+### Updating Dagger Dependencies
+
+To update the Ansible module to the latest version:
+
+```bash
+# Update to latest version from main branch
+dagger install github.com/abes140377/homelab-daggerverse/ansible
+
+# Check what changed
+git diff dagger.json
+
+# Test the new functions
+dagger functions
+```
+
+The `dagger.json` file will be updated with a new commit pin for reproducible builds.
+
 ## Project-Specific Notes
 
 - **Default remote user**: `myuser` (set in ansible.cfg)

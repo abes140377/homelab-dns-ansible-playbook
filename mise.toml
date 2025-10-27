@@ -34,12 +34,11 @@ enter = [
 description = "Install Python dependencies"
 run = "uv pip install -r requirements.txt"
 
-[tasks."dagger:run-playbook"]
-description = "Run Ansible playbook using Dagger"
+[tasks."dagger:ansible-build"]
+description = "Run Ansible playbook using local Dagger function"
 run = '''
-dagger -m github.com/abes140377/homelab-daggerverse/ansible \
-  call run-playbook \
+dagger call ansible-build \
   --directory . \
   --playbook site.yml \
-  --ssh-private-key=file:./keys/ansible_id_ecdsa
+  --ssh-private-key file:./keys/ansible_id_ecdsa
 '''

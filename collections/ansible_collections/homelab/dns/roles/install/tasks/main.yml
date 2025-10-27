@@ -3,10 +3,8 @@
   ansible.builtin.debug:
     msg: "This is task-1"
 
-- name: Debug print task-2
-  ansible.builtin.debug:
-    msg: "This is task-2"
-
-- name: Debug print task-3
-  ansible.builtin.debug:
-    msg: "This is task-3"
+- name: Install and configure AdGuard Home
+  ansible.builtin.include_role:
+    name: bcook254.adguardhome
+  vars:
+    adguardhome_version: "0.107.61"

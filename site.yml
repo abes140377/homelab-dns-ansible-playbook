@@ -1,5 +1,5 @@
 ---
 - name: Example playbook
-  hosts: all
+  hosts: primary_servers
   roles:
     - role: homelab.dns.install

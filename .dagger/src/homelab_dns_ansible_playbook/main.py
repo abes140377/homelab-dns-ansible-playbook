@@ -5,18 +5,28 @@ from dagger import dag, function, object_type
 @object_type
 class HomelabDnsAnsiblePlaybook:
     @function
-    def container_echo(self, string_arg: str) -> dagger.Container:
-        """Returns a container that echoes whatever string argument is provided"""
-        return dag.container().from_("alpine:latest").with_exec(["echo", string_arg])
+    async def ansible_build(
+        self,
+        directory: dagger.Directory,
+        playbook: str = "site.yml",
+        ssh_private_key: dagger.Secret | None = None,
+    ) -> str:
+        """
+        Runs an Ansible playbook using the remote Ansible module.
 
-    @function
-    async def grep_dir(self, directory_arg: dagger.Directory, pattern: str) -> str:
-        """Returns lines that match a pattern in the files of the provided Directory"""
-        return await (
-            dag.container()
-            .from_("alpine:latest")
-            .with_mounted_directory("/mnt", directory_arg)
-            .with_workdir("/mnt")
-            .with_exec(["grep", "-R", pattern, "."])
-            .stdout()
+        Args:
+            directory: The project directory containing the playbook and inventory
+            playbook: The name of the playbook file to run (default: site.yml)
+            ssh_private_key: SSH private key for Ansible connections
+
+        Returns:
+            Output from the Ansible playbook run
+        """
+        # Use the installed Ansible module dependency
+        result = await dag.ansible().run_playbook(
+            directory=directory,
+            playbook=playbook,
+            ssh_private_key=ssh_private_key,
         )
+
+        return result
