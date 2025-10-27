@@ -1,0 +1,13 @@
+---
+collections:
+  - name: community.general
+    version: 11.4.0
+
+roles:
+  - name: bcook254.adguardhome
+    src: https://github.com/abes140377/ansible-role-adguardhome.git
+    version: main
+    scm: git
+
+  - name: ricsanfre.bind9
+    version: v1.0.7

@@ -1,2 +1,5 @@
 ---
-ansible_ssh_private_key_file: /path/to/your/private/key
+domain: home.sflab.io
+
+primary_dns_ip: 192.168.1.13
+secondary_dns_ip: 192.168.1.14

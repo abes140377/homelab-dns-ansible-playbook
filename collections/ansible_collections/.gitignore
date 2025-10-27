@@ -1,0 +1,5 @@
+*
+!.gitignore
+!homelab
+!homelab/*
+!homelab/**

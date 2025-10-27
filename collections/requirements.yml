@@ -1,8 +1,0 @@
----
-collections:
-  - name: community.general
-    version: 11.4.0
-
-roles:
-  - name: bcook254.adguardhome
-    version: 107.61.0

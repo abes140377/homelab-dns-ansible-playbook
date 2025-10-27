@@ -1,10 +1,20 @@
 ---
-- name: Debug print task-1
-  ansible.builtin.debug:
-    msg: "This is task-1"
+# - name: Install and configure AdGuard Home
+#   ansible.builtin.include_role:
+#     name: bcook254.adguardhome
+#   when: is_primary_dns_server | default(false)
 
-- name: Install and configure AdGuard Home
+- name: Install and configure Bind9 Primary DNS Server
   ansible.builtin.include_role:
-    name: bcook254.adguardhome
-  vars:
-    adguardhome_version: "0.107.61"
+    name: ricsanfre.bind9
+  when: is_primary_dns_server | default(false)
+#
+# - name: Debug Hello from Primary DNS Server
+#   ansible.builtin.debug:
+#     msg: "Hello from Primary DNS Server"
+#   when: is_primary_dns_server | default(false)
+#
+# - name: Debug Hello from Secondary DNS Server
+#   ansible.builtin.debug:
+#     msg: "Hello from Secondary DNS Server"
+#   when: is_secondary_dns_server | default(false)
