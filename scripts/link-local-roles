@@ -1,9 +1,11 @@
 #!/bin/bash
 
+rm -r roles/ricsanfre.bind9
 ln -s \
   ~/projects/sflab/src/ansible-role-bind9 \
   ~/projects/sflab/src/homelab-dns-ansible-playbook/roles/ricsanfre.bind9
 
+rm -r roles/bcook254.adguardhome
 ln -s \
   ~/projects/sflab/src/ansible-role-adguardhome \
   ~/projects/sflab/src/homelab-dns-ansible-playbook/roles/bcook254.adguardhome

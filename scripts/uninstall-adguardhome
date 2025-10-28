@@ -1,0 +1,17 @@
+#!/bin/bash
+
+read -r -p 'Do you realy want to uninstall AdGuardHome? Answer "yes" if you are realy shure: ' answer
+if [[ "$answer" != "yes" ]]; then
+    echo "Interrupted."
+    exit 1
+fi
+
+ssh -i ./keys/ansible_id_ecdsa seba@192.168.1.13 << EOF
+sudo rm -rf /usr/local/bin/AdGuardHome*
+sudo rm -rf /usr/local/bin/data
+sudo rm -rf /etc/adguardhome/
+sudo rm -rf /etc/systemd/system/AdGuardHome.service
+
+sudo userdel adguardhome
+sudo rm -rf /var/lib/adguardhome
+EOF

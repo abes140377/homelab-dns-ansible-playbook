@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+#MISE description="Run testinfra tests against Ansible hosts"
+#USAGE arg "[file]" help="Test file/function or directory path to run" default="tests/"
+#USAGE flag "-i --info" help="Enable verbose output with log level INFO"
+#
+# Usage examples:
+# # Run all tests (default)
+# mise run test
+
+# # Run specific test file
+# mise run test tests/test_dns1.py
+
+# # Run with verbose output
+# mise run test --info
+
+# # Run specific test function
+# mise run test tests/test_dns1.py::test_external_dns_resolution_on_bind9 --info
+
+set -euo pipefail
+
+# Get test file/directory path (default: tests/)
+TEST_PATH="${usage_file:-tests/}"
+
+# Build pytest command
+PYTEST_CMD="pytest ${TEST_PATH}"
+
+# Add verbose flag if set
+if [[ "${usage_info:-false}" == "true" ]]; then
+    PYTEST_CMD="${PYTEST_CMD} --log-cli-level=INFO -v"
+fi
+
+# Echo the command for transparency
+echo "Running: ${PYTEST_CMD}"
+
+# Execute the tests
+eval "${PYTEST_CMD}"

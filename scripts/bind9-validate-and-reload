@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+
+ssh -i ./keys/ansible_id_ecdsa seba@192.168.1.13 << EOF
+sudo named-checkconf
+
+echo -n "Checking rndc status..."
+
+sudo rndc status > /dev/null 2>&1
+
+if [ $? != "0" ]; then
+    echo "rndc status failed, exiting."
+    exit 1
+fi
+
+echo " OK"
+
+# ===
+
+echo -n "Checking zone files..."
+
+sudo rndc zonestatus home.sflab.io > /dev/null 2>&1
+
+if [ $? != "0" ]; then
+    echo "zone file check failed for home.sflab.io, exiting."
+    exit 1
+fi
+
+echo " OK"
+
+# ===
+
+echo -n "Reloading bind9 configuration..."
+
+sudo rndc reload > /dev/null 2>&1
+
+if [ $? != "0" ]; then
+    echo "reload failed, exiting."
+    exit 1
+fi
+
+echo " OK"
+
+echo -n "Reconfiguring rndc..."
+
+sudo rndc reconfig > /dev/null 2>&1
+
+if [ $? != "0" ]; then
+    echo "reconfig failed, exiting."
+    exit 1
+fi
+
+echo " OK"
+EOF

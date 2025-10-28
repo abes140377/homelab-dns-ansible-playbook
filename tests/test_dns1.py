@@ -1,9 +1,19 @@
 """Tests for dns1 host."""
 
+import logging
 import pytest
+
+from conftest import get_host_ip
+from conftest import get_adguard_port
+from conftest import get_bind9_port
+from conftest import get_unbound_port
+from conftest import get_domain
+
+logger = logging.getLogger(__name__)
 
 # Configure testinfra to use ansible backend for dns1
 testinfra_hosts = ["ansible://dns1"]
+loopback_ip = "127.0.0.1"
 
 
 def test_distribution(host):
@@ -27,15 +37,42 @@ def test_service_enabled(host, service_name):
 @pytest.mark.parametrize(
     "service_config",
     [
-        {"service_name": "bind9", "ip": "192.168.1.13", "port": 53, "protocol": "tcp"},
-        {"service_name": "bind9", "ip": "192.168.1.13", "port": 53, "protocol": "udp"},
         {
             "service_name": "adguardhome",
-            "ip": "127.0.0.1",
+            "ip": get_host_ip("dns1"),
+            "port": get_adguard_port("primary"),
+            "protocol": "tcp",
+        },
+        {
+            "service_name": "adguardhome",
+            "ip": get_host_ip("dns1"),
+            "port": get_adguard_port("primary"),
+            "protocol": "udp",
+        },
+        {
+            "service_name": "adguardhome",
+            "ip": loopback_ip,
             "port": 3000,
             "protocol": "tcp",
         },
-        {"service_name": "unbound", "ip": "127.0.0.1", "port": 5335, "protocol": "tcp"},
+        {
+            "service_name": "bind9",
+            "ip": get_host_ip("dns1"),
+            "port": get_bind9_port("primary"),
+            "protocol": "tcp",
+        },
+        {
+            "service_name": "bind9",
+            "ip": get_host_ip("dns1"),
+            "port": get_bind9_port("primary"),
+            "protocol": "udp",
+        },
+        {
+            "service_name": "unbound",
+            "ip": loopback_ip,
+            "port": get_unbound_port("primary"),
+            "protocol": "tcp",
+        },
     ],
     ids=lambda config: f"{config['service_name']}-{config['protocol']}-{config['ip']}:{config['port']}",
 )
@@ -56,17 +93,17 @@ def test_service_port_listening(host, service_config):
 @pytest.mark.parametrize(
     "dns_config",
     [
-        {"fqdn": "ns1.home.sflab.io"},
-        {"fqdn": "ns2.home.sflab.io"},
-        # {"fqdn": "adguard.homelab.local", "dns_server": "192.168.1.13"},
-        # {"fqdn": "unbound.homelab.local", "dns_server": "192.168.1.13"},
+        {"fqdn": f"ns1.{get_domain()}"},
+        {"fqdn": f"ns2.{get_domain()}"},
+        {"fqdn": f"adguard.{get_domain()}"},
+        {"fqdn": f"proxmox.{get_domain()}"},
     ],
     ids=lambda config: f"{config['fqdn']}",
 )
-def test_internal_dns_resolution_on_bind9(host, dns_config):
+def test_internal_dns_resolution_on_bind9(host, dns_config, dns_host_ip):
     """Verify internal DNS resolution using dig."""
     fqdn = dns_config["fqdn"]
-    dns_server = "192.168.1.13"
+    dns_server = dns_host_ip
 
     # Run dig command to resolve FQDN
     cmd = host.run(f"dig @{dns_server} {fqdn} +short")
@@ -76,3 +113,43 @@ def test_internal_dns_resolution_on_bind9(host, dns_config):
 
     # Check if we got a response (any IP address)
     assert cmd.stdout.strip(), f"No DNS response for {fqdn} from {dns_server}"
+
+
+def test_external_dns_resolution_on_bind9(host, dns_host_ip):
+    """Verify internal DNS resolution using dig."""
+    fqdn = "google.com"
+    dns_server = dns_host_ip
+
+    logger.info(
+        f"Testing external DNS resolution for {fqdn} using DNS server {dns_server}"
+    )
+    print(f"Testing external DNS resolution for {fqdn} using DNS server {dns_server}")
+
+    # Run dig command to resolve FQDN
+    cmd = host.run(f"dig @{dns_server} {fqdn} +short")
+
+    # Check if dig command succeeded
+    assert cmd.rc == 0, f"dig command failed for {fqdn}: {cmd.stderr}"
+
+    # Check if we got a response (any IP address)
+    assert cmd.stdout.strip(), f"No DNS response for {fqdn} from {dns_server}"
+
+
+def test_adguard_port():
+    port = get_adguard_port("primary")
+    assert port == 53
+
+
+def test_bind9_port():
+    port = get_bind9_port("primary")
+    assert port == 5353
+
+
+def test_unbound_port():
+    port = get_unbound_port("primary")
+    assert port == 5335
+
+
+def test_domain():
+    port = get_domain()
+    assert port == "home.sflab.io"

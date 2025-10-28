@@ -5,6 +5,8 @@ is_primary_dns_server: true
 # AdGuardHome
 # ===========
 #
+adguardhome_dnsport: 53
+
 # AdGuard Home configuration for primary DNS server
 adguardhome_daemon: adguardhome
 
@@ -64,6 +66,9 @@ bind9_zones:
       - label: ns2
         type: A
         rdata: "{{ secondary_dns_ip }}"
+      - label: adguard
+        type: A
+        rdata: "{{ primary_dns_ip }}"
       - label: proxmox
         type: A
         rdata: 192.168.1.12
@@ -89,6 +94,9 @@ bind9_zones:
       - label: 1.14
         type: PTR
         rdata: "ns2.{{ domain }}."
+      - label: 1.13
+        type: PTR
+        rdata: "adguard.{{ domain }}."
       - label: 1.12
         type: PTR
         rdata: "proxmox.{{ domain }}."
