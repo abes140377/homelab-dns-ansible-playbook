@@ -36,8 +36,8 @@ bind9_forward: true
 bind9_recursor: true
 bind9_forward_servers:
   - "127.0.0.1 port {{ unbound_listen_addresses[0].split('@')[1] }}"
-  - 1.1.1.1
-  - 8.8.8.8
+  - 1.1.1.1 # fallback upstream DNS if Unbound is down
+  - 8.8.8.8 # fallback upstream DNS if Unbound is down
 bind9_generate_ddns_key: true
 bind9_zones:
   - name: "{{ domain }}"
@@ -46,8 +46,8 @@ bind9_zones:
       - "{{ secondary_dns_ip }}"
     ddns_update_key: ddnskey
     ddns_update_policy_grant: "zonesub any"
-    default_ttl: 600
     serial: "{{ ansible_date_time.epoch }}"
+    default_ttl: 600
     refresh: 1D
     retry: 2H
     expire: 1000H
@@ -66,16 +66,28 @@ bind9_zones:
       - label: ns2
         type: A
         rdata: "{{ secondary_dns_ip }}"
+      - label: opnsense
+        type: A
+        rdata: "192.168.1.1"
+      - label: ap
+        type: A
+        rdata: "192.168.1.10"
+      - label: switch
+        type: A
+        rdata: "192.168.1.11"
       - label: adguard
         type: A
         rdata: "{{ primary_dns_ip }}"
       - label: proxmox
         type: A
         rdata: 192.168.1.12
+      - label: speedport
+        type: A
+        rdata: 192.168.178.1
   - name: 168.192.in-addr.arpa
     type: primary
-    default_ttl: 600
     serial: "{{ ansible_date_time.epoch }}"
+    default_ttl: 600
     refresh: 1D
     retry: 2H
     expire: 1000H
@@ -94,16 +106,25 @@ bind9_zones:
       - label: 1.14
         type: PTR
         rdata: "ns2.{{ domain }}."
+      - label: 1.10
+        type: PTR
+        rdata: "ap.{{ domain }}."
+      - label: 1.11
+        type: PTR
+        rdata: "switch.{{ domain }}."
       - label: 1.13
         type: PTR
         rdata: "adguard.{{ domain }}."
       - label: 1.12
         type: PTR
         rdata: "proxmox.{{ domain }}."
+      - label: 178.1
+        type: PTR
+        rdata: "speedport.{{ domain }}."
 
-# ===========
+# =======
 # Unbound
-# ===========
+# =======
 
 unbound_listen_addresses:
   - "127.0.0.1@5335"

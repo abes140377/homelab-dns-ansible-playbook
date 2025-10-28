@@ -13,7 +13,7 @@
     content: |
       [Resolve]
       # use public ip because adguardhome is not listening to 127.0.0.1
-      DNS=192.168.1.13
+      DNS={{ primary_dns_ip }}
       FallbackDNS=1.1.1.1 8.8.8.8
       Domains={{ domain }}
       DNSStubListener=no

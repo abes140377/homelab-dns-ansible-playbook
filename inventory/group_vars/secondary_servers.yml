@@ -1,2 +1,23 @@
 ---
 is_secondary_dns_server: true
+
+# ===============
+# Bind9 Secondary
+# ===============
+
+bind9_port: 53
+bind9_authoritative: true
+bind9_forward: true
+bind9_recursor: true
+bind9_forward_servers:
+  - 8.8.8.8
+  - 4.4.4.4
+bind9_zones:
+  - name: "{{ domain }}"
+    type: secondary
+    primary_servers:
+      - "{{ primary_dns_ip }}"
+  - name: 168.192.in-addr.arpa
+    type: secondary
+    primary_servers:
+      - "{{ primary_dns_ip }}"

@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+find ./scripts -type f ! -name 'scripts' | while read -r file; do
+    echo "${file##*/}"
+done

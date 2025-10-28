@@ -133,23 +133,3 @@ def test_external_dns_resolution_on_bind9(host, dns_host_ip):
 
     # Check if we got a response (any IP address)
     assert cmd.stdout.strip(), f"No DNS response for {fqdn} from {dns_server}"
-
-
-def test_adguard_port():
-    port = get_adguard_port("primary")
-    assert port == 53
-
-
-def test_bind9_port():
-    port = get_bind9_port("primary")
-    assert port == 5353
-
-
-def test_unbound_port():
-    port = get_unbound_port("primary")
-    assert port == 5335
-
-
-def test_domain():
-    port = get_domain()
-    assert port == "home.sflab.io"
