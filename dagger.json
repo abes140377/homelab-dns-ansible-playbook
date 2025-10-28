@@ -8,7 +8,7 @@
     {
       "name": "ansible",
       "source": "github.com/abes140377/homelab-daggerverse/ansible@main",
-      "pin": "d2cb0075788e43e4106a2d5f6e04f89fa44818d3"
+      "pin": "c68b3febb5137e54351f4c84a70cd85e6b3d87fb"
     }
   ],
   "source": ".dagger"

@@ -1,0 +1,40 @@
+---
+- name: Create /etc/systemd/resolved.conf.d directory
+  file:
+    path: /etc/systemd/resolved.conf.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Create /etc/systemd/resolved.conf.d/adguardhome.conf
+  copy:
+    dest: /etc/systemd/resolved.conf.d/adguardhome.conf
+    content: |
+      [Resolve]
+      # use public ip because adguardhome is not listening to 127.0.0.1
+      DNS=192.168.1.13
+      FallbackDNS=1.1.1.1 8.8.8.8
+      Domains={{ domain }}
+      DNSStubListener=no
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Move /etc/resolv.conf to /etc/resolv.conf.backup
+  command: mv /etc/resolv.conf /etc/resolv.conf.backup
+  args:
+    creates: /etc/resolv.conf.backup
+
+- name: Create symlink /etc/resolv.conf to /run/systemd/resolve/resolv.conf
+  file:
+    path: /etc/resolv.conf
+    src: /run/systemd/resolve/resolv.conf
+    state: link
+    owner: root
+    group: root
+
+- name: Restart systemd-resolved service
+  systemd:
+    name: systemd-resolved
+    state: restarted

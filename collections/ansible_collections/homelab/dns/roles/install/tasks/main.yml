@@ -1,12 +1,18 @@
 ---
+#
 # - name: Install and configure AdGuard Home
 #   ansible.builtin.include_role:
 #     name: bcook254.adguardhome
 #   when: is_primary_dns_server | default(false)
-
-- name: Install and configure Bind9 Primary DNS Server
-  ansible.builtin.include_role:
-    name: ricsanfre.bind9
+#
+# - name: Install and configure Bind9 Primary DNS Server
+#   ansible.builtin.include_role:
+#     name: ricsanfre.bind9
+#   when: is_primary_dns_server | default(false)
+#
+- name: Include prepare tasks
+  ansible.builtin.include_tasks:
+    file: prepare.yml
   when: is_primary_dns_server | default(false)
 #
 # - name: Debug Hello from Primary DNS Server

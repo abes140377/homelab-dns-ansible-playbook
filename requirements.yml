@@ -10,4 +10,6 @@ roles:
     scm: git
 
   - name: ricsanfre.bind9
-    version: v1.0.7
+    src: https://github.com/abes140377/ansible-role-bind9.git
+    version: master
+    scm: git

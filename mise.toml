@@ -25,6 +25,8 @@ enter = [
   'pre-commit install',
   #
   'uv pip install -q -r requirements.txt',
+  # Temporarily uninstall pytest-ansible to avoid plugin conflicts
+  'uv pip uninstall -q pytest-ansible',
   #
   'echo "$ANSIBLE_SSH_PRIVATE_KEY" > keys/ansible_id_ecdsa',
   'chmod 600 keys/ansible_id_ecdsa'
@@ -32,24 +34,33 @@ enter = [
 
 [tasks.install-deps]
 description = "Install Python dependencies"
-run = "uv pip install -r requirements.txt"
+run = [
+  "uv pip install -r requirements.txt",
+  # Temporarily uninstall pytest-ansible to avoid plugin conflicts
+  "uv pip uninstall -q pytest-ansible",
+  # Reinstall pytest-ansible (part of ansible-dev-tools)
+  # "uv pip install -q -r requirements.txt"
+]
 
 [tasks."dagger:ansible-build"]
 description = "Run Ansible playbook using local Dagger function"
+usage = '''
+arg "<args>" help="Additional arguments to pass to the dagger commandline" default=""
+'''
 run = '''
-dagger -w call ansible-build \
+dagger call ansible-build \
   --directory . \
   --playbook site.yml \
-  --requirements-file collections/requirements.yml \
-  --ssh-private-key file:./keys/ansible_id_ecdsa
+  --requirements-file requirements.yml \
+  --ssh-private-key file:./keys/ansible_id_ecdsa ${usage_args?}
 '''
 
 [tasks.test]
+raw = true
 description = "Run testinfra tests against Ansible hosts"
+usage = '''
+arg "<file>" help="Test file or directory path to run" default="tests/"
+'''
 run = '''
-# Temporarily uninstall pytest-ansible to avoid plugin conflicts
-uv pip uninstall -q pytest-ansible
-pytest tests/ -v
-# Reinstall pytest-ansible (part of ansible-dev-tools)
-uv pip install -q -r requirements.txt
+pytest ${usage_file?} -v
 '''

@@ -14,3 +14,17 @@ def test_distribution(host):
 def test_distribution_version(host):
     """Verify host is running Ubuntu 24.04."""
     assert host.system_info.release == "24.04"
+
+
+@pytest.mark.parametrize("service_name", ["adguardhome", "bind9"])
+def test_service_enabled(host, service_name):
+    """Verify systemd services are enabled."""
+    service = host.service(service_name)
+    assert service.is_enabled
+
+
+@pytest.mark.parametrize("service_name", ["adguardhome", "bind9"])
+def test_service_running(host, service_name):
+    """Verify systemd services are running."""
+    service = host.service(service_name)
+    assert service.is_running

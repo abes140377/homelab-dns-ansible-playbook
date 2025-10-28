@@ -25,7 +25,8 @@ bind9_zones:
     refresh: 1D
     retry: 2H
     expire: 1000H
-    # NS and other pre-formatted records values must be given as full qualified domain names, with or without final dot, but not relative to the zone
+    # NS and other pre-formatted records values must be given as full qualified domain names,
+    # with or without final dot, but not relative to the zone
     primary: "ns.{{ domain }}" # Optional, if you don't define it, firs NS is taken
     admin: "admin.{{ domain }}"
     ns_records:
@@ -52,7 +53,8 @@ bind9_zones:
   #   refresh: 1D
   #   retry: 2H
   #   expire: 1000H
-  #   # NS and other pre-formatted records values must be given as full qualified domain names, with or without final dot, but not relative to the zone
+  #   # NS and other pre-formatted records values must be given as full qualified domain names,
+  #   # with or without final dot, but not relative to the zone
   #   primary: "ns1.{{ domain }}" # Optional, if you don't define it, firs NS is taken
   #   admin: "admin.{{ domain }}"
   #   ns_records:
