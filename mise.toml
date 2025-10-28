@@ -55,11 +55,16 @@ dagger call ansible-build \
   --ssh-private-key file:./keys/ansible_id_ecdsa ${usage_args?}
 '''
 
+# examples:
+# pytest tests/ -v
+# pytest tests/test_dns1.py -v
+# pytest tests/test_dns1.py::test_service_port_listening -v
+#
 [tasks.test]
 raw = true
 description = "Run testinfra tests against Ansible hosts"
 usage = '''
-arg "<file>" help="Test file or directory path to run" default="tests/"
+arg "<file>" help="Test file/function or directory path to run" default="tests/"
 '''
 run = '''
 pytest ${usage_file?} -v

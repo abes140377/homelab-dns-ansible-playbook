@@ -1,3 +1,5 @@
+.claude/prompts/
+
 .logs/*
 *.retry
 *.vault

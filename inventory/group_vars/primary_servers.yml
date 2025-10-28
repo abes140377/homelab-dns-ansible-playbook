@@ -1,6 +1,29 @@
 ---
 is_primary_dns_server: true
 
+# ===========
+# AdGuardHome
+# ===========
+#
+# AdGuard Home configuration for primary DNS server
+adguardhome_daemon: adguardhome
+
+# AdGuard Home: Bind DNS to LAN IP and allow Web-UI access from network
+adguardhome_dnshosts:
+  - "{{ ansible_host }}" # will resolve to 192.168.1.13 according to inventory
+
+adguardhome_webhost: "0.0.0.0"
+
+# Web-Interface on port 3000 (default is 80)
+adguardhome_webport: 3000
+
+# Internal domain name (default is 'lan')
+adguardhome_local_domain_name: "{{ domain }}"
+
+# Upstream DNS: Using Bind9 running on custom port
+adguardhome_upstream_dns:
+  - "127.0.0.1:{{ bind9_port }}"
+
 # =============
 # Bind9 Primary
 # =============
@@ -10,8 +33,9 @@ bind9_authoritative: true
 bind9_forward: true
 bind9_recursor: true
 bind9_forward_servers:
+  - "127.0.0.1 port {{ unbound_listen_addresses[0].split('@')[1] }}"
+  - 1.1.1.1
   - 8.8.8.8
-  - 4.4.4.4
 bind9_generate_ddns_key: true
 bind9_zones:
   - name: "{{ domain }}"
@@ -40,57 +64,39 @@ bind9_zones:
       - label: ns2
         type: A
         rdata: "{{ secondary_dns_ip }}"
-      - label: pi1
-        type: A
-        rdata: 192.168.1.13
       - label: proxmox
         type: A
-        rdata: 10.11.0.22
-  # - name: 168.192.in-addr.arpa
-  #   type: primary
-  #   default_ttl: 600
-  #   serial: "{{ ansible_date_time.epoch }}"
-  #   refresh: 1D
-  #   retry: 2H
-  #   expire: 1000H
-  #   # NS and other pre-formatted records values must be given as full qualified domain names,
-  #   # with or without final dot, but not relative to the zone
-  #   primary: "ns1.{{ domain }}" # Optional, if you don't define it, firs NS is taken
-  #   admin: "admin.{{ domain }}"
-  #   ns_records:
-  #     - "ns1.{{ domain }}."
-  #     - "ns2.{{ domain }}."
-  #   # RR values are either relative to the zone, either with a final dot when outside.
-  #   rrs:
-  #     - label: 1.13
-  #       type: PTR
-  #       rdata: "ns1.{{ domain }}"
-  #     - label: 1.14
-  #       type: PTR
-  #       rdata: "ns2.{{ domain }}."
-  #     # - label: 0.21
-  #     #   type: PTR
-  #     #   rdata: "node1.{{ domain }}."
-  #     # - label: 0.22
-  #     #   type: PTR
-  #     #   rdata: "node2.{{ domain }}."
+        rdata: 192.168.1.12
+  - name: 168.192.in-addr.arpa
+    type: primary
+    default_ttl: 600
+    serial: "{{ ansible_date_time.epoch }}"
+    refresh: 1D
+    retry: 2H
+    expire: 1000H
+    # NS and other pre-formatted records values must be given as full qualified domain names,
+    # with or without final dot, but not relative to the zone
+    primary: "ns1.{{ domain }}" # Optional, if you don't define it, firs NS is taken
+    admin: "admin.{{ domain }}"
+    ns_records:
+      - "ns1.{{ domain }}."
+      - "ns2.{{ domain }}."
+    # RR values are either relative to the zone, either with a final dot when outside.
+    rrs:
+      - label: 1.13
+        type: PTR
+        rdata: "ns1.{{ domain }}"
+      - label: 1.14
+        type: PTR
+        rdata: "ns2.{{ domain }}."
+      - label: 1.12
+        type: PTR
+        rdata: "proxmox.{{ domain }}."
 
 # ===========
-# AdGuardHome
+# Unbound
 # ===========
-#
-# AdGuard Home configuration for primary DNS server
-adguardhome_daemon: AdGuardHome
 
-# Web-Interface on port 3000 (default is 80)
-adguardhome_webport: 3000
-
-# Internal domain name (default is 'lan')
-adguardhome_local_domain_name: "{{ domain }}"
-
-# Upstream DNS: Using Quad9 temporarily until Unbound (127.0.0.1:5335) is installed
-# Then change to: ["127.0.0.1:5335"]
-adguardhome_upstream_dns:
-  - "127.0.0.1:{{ bind9_port }}"
-  # - "https://dns10.quad9.net/dns-query"
-  # - "9.9.9.9"
+unbound_listen_addresses:
+  - "127.0.0.1@5335"
+  - "::1@5335"

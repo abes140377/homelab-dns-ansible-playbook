@@ -1,6 +1,1 @@
 ---
-# AdGuard Home: Bind DNS to LAN IP and allow Web-UI access from network
-adguardhome_dnshosts:
-  - "{{ ansible_host }}"
-
-adguardhome_webhost: "0.0.0.0"

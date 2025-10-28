@@ -1,19 +1,28 @@
 ---
-#
-# - name: Install and configure AdGuard Home
-#   ansible.builtin.include_role:
-#     name: bcook254.adguardhome
+# - name: Debug value ansible_host
+#   ansible.builtin.debug:
+#     msg: "{{ansible_host}}"
 #   when: is_primary_dns_server | default(false)
 #
+- name: Install and configure AdGuard Home
+  ansible.builtin.include_role:
+    name: bcook254.adguardhome
+  when: is_primary_dns_server | default(false)
 # - name: Install and configure Bind9 Primary DNS Server
 #   ansible.builtin.include_role:
 #     name: ricsanfre.bind9
 #   when: is_primary_dns_server | default(false)
 #
-- name: Include prepare tasks
-  ansible.builtin.include_tasks:
-    file: prepare.yml
-  when: is_primary_dns_server | default(false)
+# - name: Install and configure Unbound DNS Resolver
+#   ansible.builtin.include_role:
+#     name: l3d.unbound
+#   when: is_primary_dns_server | default(false)
+
+# TODO: check when to use this because it affects the dns setup, maybe we can do this as post step when everything is installed
+# - name: Include prepare tasks
+#   ansible.builtin.include_tasks:
+#     file: prepare.yml
+#   when: is_primary_dns_server | default(false)
 #
 # - name: Debug Hello from Primary DNS Server
 #   ansible.builtin.debug:
