@@ -48,9 +48,12 @@ bind9_zones:
     ddns_update_policy_grant: "zonesub any"
     serial: "{{ ansible_date_time.epoch }}"
     default_ttl: 600
-    refresh: 1D
-    retry: 2H
-    expire: 1000H
+    refresh: 600
+    # refresh: 1D
+    retry: 300
+    # retry: 2H
+    expire: 7D
+    # expire: 1000H
     # NS and other pre-formatted records values must be given as full qualified domain names,
     # with or without final dot, but not relative to the zone
     primary: "ns.{{ domain }}" # Optional, if you don't define it, firs NS is taken
@@ -81,6 +84,9 @@ bind9_zones:
       - label: proxmox
         type: A
         rdata: 192.168.1.12
+      - label: minio
+        type: A
+        rdata: 192.168.1.20
       - label: speedport
         type: A
         rdata: 192.168.178.1
@@ -88,9 +94,12 @@ bind9_zones:
     type: primary
     serial: "{{ ansible_date_time.epoch }}"
     default_ttl: 600
-    refresh: 1D
-    retry: 2H
-    expire: 1000H
+    refresh: 600
+    # refresh: 1D
+    retry: 300
+    # retry: 2H
+    expire: 7D
+    # expire: 1000H
     # NS and other pre-formatted records values must be given as full qualified domain names,
     # with or without final dot, but not relative to the zone
     primary: "ns1.{{ domain }}" # Optional, if you don't define it, firs NS is taken
