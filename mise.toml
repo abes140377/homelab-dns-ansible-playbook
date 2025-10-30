@@ -25,7 +25,7 @@ enter = [
   #
   'mise i -q',
   #
-  'pre-commit install',
+  'pre-commit install -f --hook-type pre-commit',
   #
   'uv pip install -q -r requirements.txt',
   # Temporarily uninstall pytest-ansible to avoid plugin conflicts

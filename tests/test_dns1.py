@@ -133,3 +133,71 @@ def test_external_dns_resolution_on_bind9(host, dns_host_ip):
 
     # Check if we got a response (any IP address)
     assert cmd.stdout.strip(), f"No DNS response for {fqdn} from {dns_server}"
+
+
+def test_dynamic_dns_update(host, dns_host_ip):
+    """Verify dynamic DNS updates using nsupdate with TSIG key."""
+    test_fqdn = f"test-dns-update.{get_domain()}"
+    test_ip = "192.168.1.99"
+    dns_server = dns_host_ip
+    zone = get_domain()
+    bind9_port = get_bind9_port("primary")
+
+    # DDNS key configuration
+    key_name = "ddnskey"
+    key_algorithm = "hmac-sha512"
+    key_secret = __import__("os").environ.get("DNS_KEY_SECRET")
+    if not key_secret:
+        raise RuntimeError("Environment variable DNS_KEY_SECRET is not set")
+
+    logger.info(
+        f"Testing dynamic DNS update for {test_fqdn} on {dns_server}:{bind9_port}"
+    )
+
+    try:
+        # Step 1: Add A record using nsupdate with -y option for TSIG key
+        nsupdate_add = f"""server {dns_server} {bind9_port}
+zone {zone}
+update add {test_fqdn} 300 A {test_ip}
+send
+"""
+        add_cmd = host.run(
+            f"echo '{nsupdate_add}' | nsupdate -y {key_algorithm}:{key_name}:{key_secret}"
+        )
+        assert add_cmd.rc == 0, (
+            f"nsupdate add failed (rc={add_cmd.rc}): {add_cmd.stderr}\n"
+            f"stdout: {add_cmd.stdout}"
+        )
+        logger.info(f"Successfully added A record for {test_fqdn}")
+
+        # Step 2: Verify the DNS record exists
+        dig_cmd = host.run(f"dig @{dns_server} -p {bind9_port} {test_fqdn} +short")
+        assert dig_cmd.rc == 0, f"dig command failed: {dig_cmd.stderr}"
+        assert test_ip in dig_cmd.stdout, (
+            f"Expected IP {test_ip} not found in DNS response. Got: {dig_cmd.stdout}"
+        )
+        logger.info(f"Successfully verified A record: {test_fqdn} -> {test_ip}")
+
+    finally:
+        # Step 3: Cleanup - delete the A record
+        nsupdate_delete = f"""server {dns_server} {bind9_port}
+zone {zone}
+update delete {test_fqdn} A
+send
+"""
+        delete_cmd = host.run(
+            f"echo '{nsupdate_delete}' | nsupdate -y {key_algorithm}:{key_name}:{key_secret}"
+        )
+        if delete_cmd.rc == 0:
+            logger.info(f"Successfully deleted A record for {test_fqdn}")
+        else:
+            logger.warning(
+                f"Failed to delete A record for {test_fqdn}: {delete_cmd.stderr}"
+            )
+
+        # Verify deletion
+        verify_cmd = host.run(f"dig @{dns_server} -p {bind9_port} {test_fqdn} +short")
+        if verify_cmd.rc == 0 and not verify_cmd.stdout.strip():
+            logger.info(f"Verified A record deletion for {test_fqdn}")
+        elif verify_cmd.rc == 0 and verify_cmd.stdout.strip():
+            logger.warning(f"A record still exists after deletion: {verify_cmd.stdout}")
